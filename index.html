@@ -8,7 +8,7 @@
 :root{
   --bg:#0b1329;
   --text:#e9f0fb; --muted:#a3b4cf; --hint:#748aa8;
-  --card:rgba(255,255,255,.07); --card2:rgba(255,255,255,.11);
+  --card:rgba(20,15,50,.55); --card2:rgba(30,20,60,.65);
   --border:rgba(255,255,255,.13); --border2:rgba(255,255,255,.22);
   --fin:#4b91ff; --fin-bg:rgba(75,145,255,.16);
   --hab:#8f8bff; --hab-bg:rgba(143,139,255,.16);
@@ -25,10 +25,13 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
   color:var(--text); font-size:16px; line-height:1.5;
   background:#0a1226;
-  background:radial-gradient(130% 90% at 50% -12%, #1c3160 0%, #12224a 42%, #0a1428 78%, #070e20 100%) fixed;
+  background-image: url('bg.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
   min-height:100vh; -webkit-font-smoothing:antialiased;
 }
-.app{max-width:480px; margin:0 auto; min-height:100vh; background:transparent; padding-bottom:100px; position:relative;}
+.app{max-width:480px; margin:0 auto; min-height:100vh; background:rgba(5,8,20,0.55); padding-bottom:100px; position:relative; backdrop-filter:blur(0px);}
 .hero{position:relative; height:272px; border-radius:0 0 30px 30px; overflow:hidden; margin-bottom:8px;}
 .heroScene{position:absolute; inset:0;}
 .heroScene svg{width:100%; height:100%; display:block;}
