@@ -410,6 +410,7 @@ const WD=["вс","пн","вт","ср","чт","пт","сб"];
 
 /* ---------- STATE ---------- */
 const KEY="dashboardState_v2";
+localStorage.removeItem("dashboardState_v1");
 let S;
 function load(){ try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){S=null;} if(!S) S=seed(); }
 function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
