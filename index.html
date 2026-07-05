@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b1329">
+<title>Мой дашборд</title>
+<style>
+:root{
+  --bg:#0b1329;
+  --text:#e9f0fb; --muted:#a3b4cf; --hint:#748aa8;
+  --card:rgba(255,255,255,.07); --card2:rgba(255,255,255,.11);
+  --border:rgba(255,255,255,.13); --border2:rgba(255,255,255,.22);
+  --fin:#4b91ff; --fin-bg:rgba(75,145,255,.16);
+  --hab:#8f8bff; --hab-bg:rgba(143,139,255,.16);
+  --hea:#37c6b0; --hea-bg:rgba(55,198,176,.16);
+  --good:#4ecb8f; --good-bg:rgba(78,203,143,.15);
+  --bad:#ff6f6f; --bad-bg:rgba(255,111,111,.15);
+  --warn:#f0b45a; --warn-bg:rgba(240,180,90,.15);
+  --accent:#3d8bfd;
+  --radius:16px; --shadow:0 10px 34px rgba(0,0,0,.30);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  color:var(--text); font-size:16px; line-height:1.5;
+  background:#0a1226;
+  background:radial-gradient(130% 90% at 50% -12%, #1c3160 0%, #12224a 42%, #0a1428 78%, #070e20 100%) fixed;
+  min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+.app{max-width:480px; margin:0 auto; min-height:100vh; background:transparent; padding-bottom:100px; position:relative;}
+.hero{position:relative; height:272px; border-radius:0 0 30px 30px; overflow:hidden; margin-bottom:8px;}
+.heroScene{position:absolute; inset:0;}
+.heroScene svg{width:100%; height:100%; display:block;}
+.hero::after{content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg, rgba(7,13,30,.62) 0%, rgba(7,13,30,0) 32%, rgba(7,13,30,.05) 66%, rgba(8,15,32,.72) 100%);}
+.heroText{position:absolute; top:0; left:0; right:0; padding:26px 22px; z-index:2;}
+.heroText h1{margin:0; font-size:30px; font-weight:800; letter-spacing:-.02em; color:#fff; text-shadow:0 2px 14px rgba(0,0,0,.4);}
+.heroText .sub{color:rgba(255,255,255,.85); font-size:13px; margin-top:5px; font-weight:500; text-shadow:0 1px 8px rgba(0,0,0,.35);}
+.screen{display:none; padding:0 16px; animation:fade .2s ease;}
+.screen.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+h2.sec{font-size:15px; font-weight:600; margin:22px 0 10px; color:var(--muted); letter-spacing:.01em;}
+.card{background:var(--card); border:1px solid var(--border); border-radius:20px; padding:16px; box-shadow:var(--shadow); margin-bottom:12px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);}
+.card.tight{padding:12px 14px;}
+.row{display:flex; align-items:center; gap:12px;}
+.row.sb{justify-content:space-between;}
+.muted{color:var(--muted);} .hint{color:var(--hint); font-size:13px;}
+.big{font-size:30px; font-weight:700; letter-spacing:-.02em;}
+.pill{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;}
+.stat{background:var(--card); border:1px solid var(--border); border-radius:18px; padding:14px; box-shadow:var(--shadow); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);}
+.stat .lbl{font-size:12px; color:var(--muted); font-weight:500;}
+.stat .val{font-size:20px; font-weight:700; margin-top:3px; letter-spacing:-.01em;}
+.bar{height:8px; border-radius:999px; background:var(--border); overflow:hidden; margin-top:8px;}
+.bar > i{display:block; height:100%; border-radius:999px; transition:width .3s;}
+.listitem{display:flex; align-items:center; gap:12px; padding:11px 0; border-top:1px solid var(--border);}
+.listitem:first-child{border-top:none;}
+.ico{width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0;}
+.grow{flex:1; min-width:0;}
+.nm{font-weight:600; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.sm{font-size:13px; color:var(--muted);}
+.amt{font-weight:700; font-size:15px; white-space:nowrap;}
+.amt.pos{color:var(--good);} .amt.neg{color:var(--text);}
+button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; font-size:16px;}
+.btn{background:var(--accent); color:#fff; border-radius:14px; padding:12px 16px; font-weight:600; font-size:15px; width:100%; transition:opacity .15s;}
+.btn:active{opacity:.8;}
+.btn.ghost{background:var(--card2); color:var(--text); border:1px solid var(--border2); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);}
+.btn.sm{padding:8px 12px; font-size:14px; width:auto;}
+.chk{width:30px; height:30px; border-radius:9px; border:2px solid var(--border2); display:flex; align-items:center; justify-content:center; font-size:17px; color:#fff; flex-shrink:0; transition:.15s;}
+.chk.on{background:var(--hab); border-color:var(--hab);}
+.streakgrid{display:grid; grid-template-columns:repeat(15,1fr); gap:3px; margin-top:12px;}
+.cell{aspect-ratio:1; border-radius:3px; background:var(--border);}
+.ring{position:relative; width:74px; height:74px;}
+.ring svg{transform:rotate(-90deg);}
+.ring .txt{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+.ring .txt b{font-size:16px; font-weight:700;} .ring .txt span{font-size:10px; color:var(--muted);}
+.spark{width:100%; height:44px; display:block;}
+nav{position:fixed; bottom:0; left:0; right:0; z-index:30;}
+.navinner{max-width:480px; margin:0 auto; background:rgba(11,19,41,.66); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--border); display:flex; padding:12px 6px calc(12px + env(safe-area-inset-bottom)); border-radius:26px 26px 0 0;}
+.navbtn{flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:4px 0; color:var(--hint); font-size:0;}
+.navbtn svg{width:25px; height:25px;}
+.navbtn.on{color:var(--fin);}
+.navbtn.on::after{content:""; width:5px; height:5px; border-radius:50%; background:currentColor; display:block;}
+.fab{position:fixed; bottom:calc(82px + env(safe-area-inset-bottom)); right:calc(50% - 240px + 16px); z-index:31; width:56px; height:56px; border-radius:18px; background:var(--fin); color:#fff; box-shadow:0 12px 30px rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:300;}
+@media(max-width:512px){.fab{right:16px;}}
+.sheet-bg{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:40; display:none; align-items:flex-end; justify-content:center;}
+.sheet-bg.open{display:flex;}
+.sheet{background:rgba(16,26,50,.94); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px); border:1px solid var(--border); border-bottom:none; width:100%; max-width:480px; border-radius:26px 26px 0 0; padding:8px 18px calc(24px + env(safe-area-inset-bottom)); max-height:88vh; overflow-y:auto; animation:up .25s ease;}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.grabber{width:40px; height:4px; border-radius:999px; background:var(--border2); margin:8px auto 14px;}
+.sheet h3{margin:0 0 16px; font-size:19px; font-weight:600;}
+label.f{display:block; font-size:13px; color:var(--muted); font-weight:600; margin:14px 0 6px;}
+input,select{width:100%; font-family:inherit; font-size:16px; padding:12px 14px; border-radius:12px; border:1px solid var(--border2); background:var(--card2); color:var(--text);}
+input::placeholder{color:var(--hint);}
+input:focus,select:focus{outline:none; border-color:var(--accent);}
+.seg{display:flex; gap:6px; background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:6px;}
+.seg button{flex:1; padding:9px; border-radius:9px; font-size:14px; font-weight:600; color:var(--muted);}
+.seg button.on{background:var(--accent); color:#fff;}
+.chips{display:flex; flex-wrap:wrap; gap:8px;}
+.chip{padding:9px 13px; border-radius:11px; border:1px solid var(--border2); background:var(--card2); font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;}
+.chip.on{border-color:var(--accent); background:var(--fin-bg); color:#cfe1ff;}
+.plusrow{display:flex; gap:8px; align-items:center;}
+.stepbtn{width:44px; height:44px; border-radius:12px; border:1px solid var(--border2); background:var(--card2); font-size:22px; font-weight:400; display:flex; align-items:center; justify-content:center;}
+.empty{text-align:center; color:var(--hint); padding:24px 0; font-size:14px;}
+.tag{font-size:11px; padding:2px 7px; border-radius:6px; font-weight:600;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hero">
+    <div class="heroScene" id="heroScene">
+<svg viewBox="0 0 400 272" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+ <lineargradient id="dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fc4ea"></stop><stop offset=".6" stop-color="#c7e4f4"></stop><stop offset="1" stop-color="#eaf6fb"></stop></lineargradient>
+ <lineargradient id="dm1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8199b6"></stop><stop offset="1" stop-color="#61809e"></stop></lineargradient>
+ <lineargradient id="dm2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#40705f"></stop><stop offset="1" stop-color="#2b5145"></stop></lineargradient>
+ <lineargradient id="dlake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c3e2ec"></stop><stop offset="1" stop-color="#93c4d8"></stop></lineargradient>
+</defs>
+<rect width="400" height="272" fill="url(#dsky)"></rect>
+<circle cx="322" cy="70" r="58" fill="#fff6d8" opacity=".5"></circle>
+<circle cx="322" cy="70" r="29" fill="#ffe6a0"></circle>
+<g fill="#ffffff" opacity=".92">
+ <ellipse cx="88" cy="72" rx="33" ry="13"></ellipse><ellipse cx="118" cy="63" rx="23" ry="12"></ellipse>
+ <ellipse cx="205" cy="42" rx="25" ry="10"></ellipse><ellipse cx="230" cy="48" rx="17" ry="9"></ellipse>
+</g>
+<path d="M0 150 L70 92 L140 145 L210 90 L290 150 L360 108 L400 145 L400 272 L0 272 Z" fill="url(#dm1)"></path>
+<path d="M120 145 L145 118 L167 145 Z" fill="#eef6fb"></path><path d="M210 145 L210 90 L236 122 Z" fill="#eef6fb" opacity=".85"></path>
+<path d="M0 190 L80 138 L160 188 L240 140 L320 190 L400 162 L400 272 L0 272 Z" fill="url(#dm2)"></path>
+<path d="M0 206 L400 215 L400 272 L0 272 Z" fill="url(#dlake)"></path>
+<g fill="#2e5a4c">
+ <polygon points="40,206 48,181 56,206"></polygon><polygon points="58,206 66,187 74,206"></polygon><polygon points="328,206 336,183 344,206"></polygon><polygon points="346,206 353,190 360,206"></polygon>
+</g>
+</svg></div>
+    <div class="heroText">
+      <h1 id="hTitle">Добрый день 👋</h1>
+      <div class="sub" id="hDate">вс, 5 июля</div>
+    </div>
+  </div>
+
+  <section class="screen" id="s-home">
+    <div class="card" style="background:var(--fin-bg); border-color:transparent;">
+      <div class="row sb">
+        <div>
+          <div class="hint" style="color:#bcd4ff; opacity:.9; font-weight:600;">Всего на счетах</div>
+          <div class="big" style="color:#fff;">227&nbsp;050 ₽</div>
+        </div>
+        <span class="pill" style="background:rgba(255,255,255,.14); color:var(--good);">
+          ▲ 53&nbsp;050 ₽ за мес</span>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="stat"><div class="lbl">Доход за месяц</div><div class="val" style="color:var(--good)">+95&nbsp;000 ₽</div></div>
+      <div class="stat"><div class="lbl">Расход за месяц</div><div class="val">−41&nbsp;950 ₽</div></div>
+    </div>
+
+    <div class="card">
+      <div class="row sb"><b>Остаток бюджета</b><span class="sm">23&nbsp;050 ₽ из 30&nbsp;000 ₽</span></div>
+      <div class="bar"><i style="width:23.166666666666664%; background:var(--fin)"></i></div>
+    </div>
+
+    <h2 class="sec">Здоровье сегодня</h2>
+    <div class="grid3">
+      <div class="stat" style="display:flex;align-items:center;justify-content:center;">
+    <div class="ring">
+      <svg width="74" height="74"><circle cx="37" cy="37" r="26" fill="none" stroke="var(--border)" stroke-width="7"></circle>
+      <circle cx="37" cy="37" r="26" fill="none" stroke="var(--hea)" stroke-width="7" stroke-linecap="round" stroke-dasharray="163.36281798666926" stroke-dashoffset="102.10176124166829"></circle></svg>
+      <div class="txt"><b>0.8л</b><span>Вода</span></div>
+    </div></div>
+      <div class="stat" style="text-align:center;"><div style="font-size:24px">😴</div>
+    <div class="val" style="font-size:19px">7.5</div><div class="lbl">ч сна</div></div>
+      <div class="stat" style="text-align:center;"><div style="font-size:24px">🏃</div>
+    <div class="val" style="font-size:19px">1</div><div class="lbl">трен.</div></div>
+    </div>
+
+    <h2 class="sec">Привычки сегодня</h2>
+    <div class="card">
+      
+        <div class="listitem" data-hab="ybuip72">
+          <div class="ico" style="background:#4b91ff22">💧</div>
+          <div class="grow"><div class="nm">Вода 2л</div><div class="sm">🔥 3 дн</div></div>
+          <div class="chk " style=""></div>
+        </div>
+        <div class="listitem" data-hab="zmns2nw">
+          <div class="ico" style="background:#8f8bff22">📖</div>
+          <div class="grow"><div class="nm">Чтение</div><div class="sm">🔥 2 дн</div></div>
+          <div class="chk " style=""></div>
+        </div>
+        <div class="listitem" data-hab="ekhcdpk">
+          <div class="ico" style="background:#f0b45a22">🧘</div>
+          <div class="grow"><div class="nm">Медитация</div><div class="sm">🔥 0 дн</div></div>
+          <div class="chk " style=""></div>
+        </div>
+    </div>
+
+    <button class="btn ghost" style="margin-bottom:12px" onclick="openTxn()">＋ Добавить трату</button>
+  </section>
+  <section class="screen" id="s-fin">
+    <div class="grid3">
+      <div class="stat"><div class="lbl">Доход</div><div class="val" style="color:var(--good);font-size:17px">+95к ₽</div></div>
+      <div class="stat"><div class="lbl">Расход</div><div class="val" style="font-size:17px">−42к ₽</div></div>
+      <div class="stat"><div class="lbl">Отложено</div><div class="val" style="color:var(--fin);font-size:17px">53к ₽</div></div>
+    </div>
+
+    <h2 class="sec">Счета</h2>
+    <div class="card">
+      <div class="listitem">
+        <div class="ico" style="background:#4b91ff22">💳</div>
+        <div class="grow"><div class="nm">Карта</div></div>
+        <div class="amt">102&nbsp;600 ₽</div></div><div class="listitem">
+        <div class="ico" style="background:#4ecb8f22">💵</div>
+        <div class="grow"><div class="nm">Наличные</div></div>
+        <div class="amt">4&nbsp;450 ₽</div></div><div class="listitem">
+        <div class="ico" style="background:#37c6b022">🏦</div>
+        <div class="grow"><div class="nm">Накопления</div></div>
+        <div class="amt">120&nbsp;000 ₽</div></div>
+    </div>
+
+    <h2 class="sec">Бюджеты · этот месяц</h2>
+    <div class="card">
+      <div style="padding:10px 0; border-top:1px solid var(--border)">
+          <div class="row sb"><span class="nm" style="font-size:14px">🍎 Еда</span>
+            <span class="sm" style="color:var(--muted)">3&nbsp;050 ₽ / 15&nbsp;000 ₽</span></div>
+          <div class="bar"><i style="width:20.333333333333332%; background:var(--fin)"></i></div></div><div style="padding:10px 0; border-top:1px solid var(--border)">
+          <div class="row sb"><span class="nm" style="font-size:14px">☕ Кафе</span>
+            <span class="sm" style="color:var(--muted)">1&nbsp;200 ₽ / 5&nbsp;000 ₽</span></div>
+          <div class="bar"><i style="width:24%; background:var(--fin)"></i></div></div><div style="padding:10px 0; border-top:1px solid var(--border)">
+          <div class="row sb"><span class="nm" style="font-size:14px">🚇 Транспорт</span>
+            <span class="sm" style="color:var(--muted)">900 ₽ / 4&nbsp;000 ₽</span></div>
+          <div class="bar"><i style="width:22.5%; background:var(--fin)"></i></div></div><div style="padding:10px 0; border-top:1px solid var(--border)">
+          <div class="row sb"><span class="nm" style="font-size:14px">🎬 Развлечения</span>
+            <span class="sm" style="color:var(--muted)">1&nbsp;800 ₽ / 6&nbsp;000 ₽</span></div>
+          <div class="bar"><i style="width:30%; background:var(--fin)"></i></div></div>
+    </div>
+
+    <h2 class="sec">Цели</h2>
+    <div class="grid2">
+      <div class="stat"><div class="row sb"><span style="font-size:20px">✈️</span><span class="sm">57%</span></div>
+        <div class="nm" style="margin-top:6px">Отпуск</div><div class="sm">85к ₽ / 150к ₽</div>
+        <div class="bar"><i style="width:56.666666666666664%; background:var(--fin)"></i></div></div><div class="stat"><div class="row sb"><span style="font-size:20px">🛟</span><span class="sm">40%</span></div>
+        <div class="nm" style="margin-top:6px">Подушка</div><div class="sm">120к ₽ / 300к ₽</div>
+        <div class="bar"><i style="width:40%; background:var(--fin)"></i></div></div>
+    </div>
+
+    <h2 class="sec">Операции</h2>
+    <div class="card">
+      <div class="sm" style="margin:10px 0 2px; color:var(--hint)">Сегодня</div><div class="listitem">
+      <div class="ico" style="background:#4ecb8f22">🍎</div>
+      <div class="grow"><div class="nm" style="font-size:14px">Еда</div><div class="sm">Наличные</div></div>
+      <div class="amt neg">−650 ₽</div></div><div class="sm" style="margin:10px 0 2px; color:var(--hint)">Вчера</div><div class="listitem">
+      <div class="ico" style="background:#4b91ff22">🚇</div>
+      <div class="grow"><div class="nm" style="font-size:14px">Транспорт</div><div class="sm">Наличные</div></div>
+      <div class="amt neg">−900 ₽</div></div><div class="listitem">
+      <div class="ico" style="background:#8f8bff22">🎬</div>
+      <div class="grow"><div class="nm" style="font-size:14px">Развлечения · Кино</div><div class="sm">Карта</div></div>
+      <div class="amt neg">−1&nbsp;800 ₽</div></div><div class="sm" style="margin:10px 0 2px; color:var(--hint)">3 июля</div><div class="listitem">
+      <div class="ico" style="background:#e79a5b22">☕</div>
+      <div class="grow"><div class="nm" style="font-size:14px">Кафе</div><div class="sm">Карта</div></div>
+      <div class="amt neg">−1&nbsp;200 ₽</div></div><div class="listitem">
+      <div class="ico" style="background:#f0b45a22">🏠</div>
+      <div class="grow"><div class="nm" style="font-size:14px">Жильё · Аренда</div><div class="sm">Карта</div></div>
+      <div class="amt neg">−35&nbsp;000 ₽</div></div><div class="sm" style="margin:10px 0 2px; color:var(--hint)">2 июля</div><div class="listitem">
+      <div class="ico" style="background:#4ecb8f22">🍎</div>
+      <div class="grow"><div class="nm" style="font-size:14px">Еда · Продукты</div><div class="sm">Карта</div></div>
+      <div class="amt neg">−2&nbsp;400 ₽</div></div><div class="sm" style="margin:10px 0 2px; color:var(--hint)">1 июля</div><div class="listitem">
+      <div class="ico" style="background:#37c6b022">💼</div>
+      <div class="grow"><div class="nm" style="font-size:14px">Зарплата</div><div class="sm">Карта</div></div>
+      <div class="amt pos">+95&nbsp;000 ₽</div></div>
+    </div>
+  </section>
+  <section class="screen" id="s-hab"><div class="card" data-hab="6zz53sm">
+      <div class="row">
+        <div class="ico" style="background:#37c6b022">🏃</div>
+        <div class="grow"><div class="nm">Спорт</div>
+          <div class="sm">3×/нед · 🔥 1 нед</div></div>
+        <div class="chk on" data-toggle="6zz53sm" style="background:#37c6b0;border-color:#37c6b0">✓</div>
+      </div>
+      <div class="row sb" style="margin-top:12px"><span class="sm">Последние 15 дней</span><span class="sm">100% за нед</span></div>
+      <div class="streakgrid"><div class="cell" style="background:var(--border)" title="2026-06-21"></div><div class="cell" style="background:var(--border)" title="2026-06-22"></div><div class="cell" style="background:var(--border)" title="2026-06-23"></div><div class="cell" style="background:var(--border)" title="2026-06-24"></div><div class="cell" style="background:var(--border)" title="2026-06-25"></div><div class="cell" style="background:var(--border)" title="2026-06-26"></div><div class="cell" style="background:var(--border)" title="2026-06-27"></div><div class="cell" style="background:var(--border)" title="2026-06-28"></div><div class="cell" style="background:#37c6b0" title="2026-06-29"></div><div class="cell" style="background:#37c6b0" title="2026-06-30"></div><div class="cell" style="background:var(--border)" title="2026-07-01"></div><div class="cell" style="background:#37c6b0" title="2026-07-02"></div><div class="cell" style="background:var(--border)" title="2026-07-03"></div><div class="cell" style="background:#37c6b0" title="2026-07-04"></div><div class="cell" style="background:#37c6b0" title="2026-07-05"></div></div>
+    </div><div class="card" data-hab="ybuip72">
+      <div class="row">
+        <div class="ico" style="background:#4b91ff22">💧</div>
+        <div class="grow"><div class="nm">Вода 2л</div>
+          <div class="sm">каждый день · 🔥 3 дн</div></div>
+        <div class="chk " data-toggle="ybuip72" style=""></div>
+      </div>
+      <div class="row sb" style="margin-top:12px"><span class="sm">Последние 15 дней</span><span class="sm">43% за нед</span></div>
+      <div class="streakgrid"><div class="cell" style="background:var(--border)" title="2026-06-21"></div><div class="cell" style="background:var(--border)" title="2026-06-22"></div><div class="cell" style="background:var(--border)" title="2026-06-23"></div><div class="cell" style="background:var(--border)" title="2026-06-24"></div><div class="cell" style="background:var(--border)" title="2026-06-25"></div><div class="cell" style="background:var(--border)" title="2026-06-26"></div><div class="cell" style="background:var(--border)" title="2026-06-27"></div><div class="cell" style="background:var(--border)" title="2026-06-28"></div><div class="cell" style="background:var(--border)" title="2026-06-29"></div><div class="cell" style="background:var(--border)" title="2026-06-30"></div><div class="cell" style="background:var(--border)" title="2026-07-01"></div><div class="cell" style="background:#4b91ff" title="2026-07-02"></div><div class="cell" style="background:#4b91ff" title="2026-07-03"></div><div class="cell" style="background:#4b91ff" title="2026-07-04"></div><div class="cell" style="background:var(--border)" title="2026-07-05"></div></div>
+    </div><div class="card" data-hab="zmns2nw">
+      <div class="row">
+        <div class="ico" style="background:#8f8bff22">📖</div>
+        <div class="grow"><div class="nm">Чтение</div>
+          <div class="sm">каждый день · 🔥 2 дн</div></div>
+        <div class="chk " data-toggle="zmns2nw" style=""></div>
+      </div>
+      <div class="row sb" style="margin-top:12px"><span class="sm">Последние 15 дней</span><span class="sm">29% за нед</span></div>
+      <div class="streakgrid"><div class="cell" style="background:var(--border)" title="2026-06-21"></div><div class="cell" style="background:var(--border)" title="2026-06-22"></div><div class="cell" style="background:var(--border)" title="2026-06-23"></div><div class="cell" style="background:var(--border)" title="2026-06-24"></div><div class="cell" style="background:var(--border)" title="2026-06-25"></div><div class="cell" style="background:var(--border)" title="2026-06-26"></div><div class="cell" style="background:var(--border)" title="2026-06-27"></div><div class="cell" style="background:var(--border)" title="2026-06-28"></div><div class="cell" style="background:var(--border)" title="2026-06-29"></div><div class="cell" style="background:var(--border)" title="2026-06-30"></div><div class="cell" style="background:var(--border)" title="2026-07-01"></div><div class="cell" style="background:var(--border)" title="2026-07-02"></div><div class="cell" style="background:#8f8bff" title="2026-07-03"></div><div class="cell" style="background:#8f8bff" title="2026-07-04"></div><div class="cell" style="background:var(--border)" title="2026-07-05"></div></div>
+    </div><div class="card" data-hab="ekhcdpk">
+      <div class="row">
+        <div class="ico" style="background:#f0b45a22">🧘</div>
+        <div class="grow"><div class="nm">Медитация</div>
+          <div class="sm">каждый день · 🔥 0 дн</div></div>
+        <div class="chk " data-toggle="ekhcdpk" style=""></div>
+      </div>
+      <div class="row sb" style="margin-top:12px"><span class="sm">Последние 15 дней</span><span class="sm">0% за нед</span></div>
+      <div class="streakgrid"><div class="cell" style="background:var(--border)" title="2026-06-21"></div><div class="cell" style="background:var(--border)" title="2026-06-22"></div><div class="cell" style="background:var(--border)" title="2026-06-23"></div><div class="cell" style="background:var(--border)" title="2026-06-24"></div><div class="cell" style="background:var(--border)" title="2026-06-25"></div><div class="cell" style="background:var(--border)" title="2026-06-26"></div><div class="cell" style="background:var(--border)" title="2026-06-27"></div><div class="cell" style="background:var(--border)" title="2026-06-28"></div><div class="cell" style="background:var(--border)" title="2026-06-29"></div><div class="cell" style="background:var(--border)" title="2026-06-30"></div><div class="cell" style="background:var(--border)" title="2026-07-01"></div><div class="cell" style="background:var(--border)" title="2026-07-02"></div><div class="cell" style="background:var(--border)" title="2026-07-03"></div><div class="cell" style="background:var(--border)" title="2026-07-04"></div><div class="cell" style="background:var(--border)" title="2026-07-05"></div></div>
+    </div><button class="btn ghost" style="margin-bottom:12px" onclick="openHabit()">＋ Новая привычка</button></section>
+  <section class="screen active" id="s-hea">
+    <div class="card">
+      <div class="row sb"><b>💧 Вода</b><span class="sm">0.75л / 2л</span></div>
+      <div class="bar"><i style="width:37.5%; background:var(--hea)"></i></div>
+      <div class="plusrow" style="margin-top:12px">
+        <button class="btn sm ghost" onclick="addWater(0.25)">+ стакан</button>
+        <button class="btn sm ghost" onclick="addWater(0.5)">+ 0.5л</button>
+        <button class="btn sm ghost" onclick="addWater(-0.25)">−</button>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="stat"><div class="lbl">Сон вчера</div><div class="val">7.5 ч</div>
+        <button class="btn sm ghost" style="margin-top:8px; width:100%" onclick="openSleep()">Записать сон</button></div>
+      <div class="stat"><div class="lbl">Вес</div><div class="val">66.6 кг</div>
+        <div class="sm" style="color:var(--good)">-1.4 кг за период</div></div>
+    </div>
+
+    <div class="card">
+      <div class="row sb"><b>📉 Динамика веса</b><span class="sm">4 записей</span></div>
+      <svg class="spark" viewBox="0 0 420 44" preserveAspectRatio="none">
+    <polyline fill="none" stroke="var(--hea)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="4.0,4.0 141.3,19.4 278.7,29.7 416.0,40.0"></polyline>
+    <circle cx="416.0" cy="40.0" r="3.5" fill="var(--hea)"></circle></svg>
+      <button class="btn sm ghost" style="margin-top:10px; width:100%" onclick="openWeight()">Записать вес</button>
+    </div>
+
+    <h2 class="sec">Тренировки <span class="tag" style="background:var(--hab-bg); color:#c3c0ff">→ привычка «Спорт»</span></h2>
+    <div class="card">
+      
+        <div class="listitem"><div class="ico" style="background:var(--hea-bg)">🏋️</div>
+          <div class="grow"><div class="nm" style="font-size:14px">Бег</div><div class="sm">Вчера</div></div>
+          <div class="amt">30 мин</div></div>
+        <div class="listitem"><div class="ico" style="background:var(--hea-bg)">🏋️</div>
+          <div class="grow"><div class="nm" style="font-size:14px">Зал</div><div class="sm">2 июля</div></div>
+          <div class="amt">60 мин</div></div>
+      <button class="btn sm ghost" style="margin-top:12px; width:100%" onclick="openWorkout()">＋ Добавить тренировку</button>
+    </div>
+
+    <div class="card tight">
+      <div class="row sb"><b>🍽️ Приёмы пищи сегодня</b>
+        <div class="plusrow"><button class="stepbtn" onclick="addMeal(-1)">−</button>
+        <b style="font-size:20px; min-width:24px; text-align:center">2</b>
+        <button class="stepbtn" onclick="addMeal(1)">+</button></div></div>
+    </div>
+  </section>
+
+  <button class="fab" id="fab" style="background: var(--hea);">+</button>
+</div>
+
+<nav><div class="navinner" id="nav">
+    <button class="navbtn " data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10v10h14V10"></path></svg>
+      Главная
+    </button>
+    <button class="navbtn " data-tab="fin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v12H3z"></path><path d="M3 11h18"></path><circle cx="8" cy="15" r="1.4"></circle></svg>
+      Финансы
+    </button>
+    <button class="navbtn " data-tab="hab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path><path d="M3 18h8"></path></svg>
+      Привычки
+    </button>
+    <button class="navbtn on" data-tab="hea" style="color: var(--hea);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9C.8 8.6 2.4 5 6 5c2 0 3.2 1.2 4 2.3C10.8 6.2 12 5 14 5c3.6 0 5.2 3.6 3.5 7-2.5 4.5-9.5 9-9.5 9z"></path></svg>
+      Здоровье
+    </button></div></nav>
+
+<div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet"><div class="grabber"></div>
+    <h3>Новая операция</h3>
+    <div class="seg" id="txType">
+      <button data-t="expense" class="on">Расход</button>
+      <button data-t="income" class="">Доход</button>
+    </div>
+    <label class="f">Сумма, ₽</label>
+    <input id="txAmt" type="number" inputmode="decimal" placeholder="0" autofocus="">
+    <label class="f">Категория</label>
+    <div class="chips" id="txCats"><button class="chip on" data-c="Еда">🍎 Еда</button><button class="chip " data-c="Транспорт">🚇 Транспорт</button><button class="chip " data-c="Жильё">🏠 Жильё</button><button class="chip " data-c="Кафе">☕ Кафе</button><button class="chip " data-c="Здоровье">💊 Здоровье</button><button class="chip " data-c="Развлечения">🎬 Развлечения</button><button class="chip " data-c="Покупки">🛍️ Покупки</button><button class="chip " data-c="Другое">• Другое</button></div>
+    <label class="f">Счёт</label>
+    <div class="chips" id="txAccs"><button class="chip on" data-a="a1">💳 Карта</button><button class="chip " data-a="a2">💵 Наличные</button><button class="chip " data-a="a3">🏦 Накопления</button></div>
+    <label class="f">Заметка</label>
+    <input id="txNote" placeholder="необязательно">
+    <button class="btn" style="margin-top:20px" id="txSave">Сохранить</button>
+  </div></div>
+
+<script>
+"use strict";
+
+/* ---------- TELEGRAM MINI APP ---------- */
+const tg = window.Telegram?.WebApp || { ready:()=>{}, expand:()=>{}, colorScheme:'dark', close:()=>{}, MainButton:{setText:()=>{},show:()=>{},hide:()=>{},onClick:()=>{}}, BackButton:{show:()=>{},hide:()=>{},onClick:()=>{}} };
+tg.ready();
+tg.expand();
+
+const $ = (s,r=document)=>r.querySelector(s);
+const RUB = "₽";
+const fmt = n => Math.round(n).toLocaleString("ru-RU") + " " + RUB;
+const todayISO = ()=> new Date().toISOString().slice(0,10);
+const daysAgo = n => { const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); };
+const uid = ()=> Math.random().toString(36).slice(2,9);
+const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+const WD=["вс","пн","вт","ср","чт","пт","сб"];
+
+/* ---------- STATE ---------- */
+const KEY="dashboardState_v1";
+let S;
+function load(){ try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){S=null;} if(!S) S=seed(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+function seed(){
+  const t=todayISO();
+  return {
+    settings:{ monthStart:1 },
+    accounts:[
+      {id:"a1",name:"Карта",icon:"💳",color:"#4b91ff",init:48000},
+      {id:"a2",name:"Наличные",icon:"💵",color:"#4ecb8f",init:6000},
+      {id:"a3",name:"Накопления",icon:"🏦",color:"#37c6b0",init:120000},
+    ],
+    categories:{
+      expense:[
+        {name:"Еда",icon:"🍎",color:"#4ecb8f"},{name:"Транспорт",icon:"🚇",color:"#4b91ff"},
+        {name:"Жильё",icon:"🏠",color:"#f0b45a"},{name:"Кафе",icon:"☕",color:"#e79a5b"},
+        {name:"Здоровье",icon:"💊",color:"#ff6f6f"},{name:"Развлечения",icon:"🎬",color:"#8f8bff"},
+        {name:"Покупки",icon:"🛍️",color:"#f08bc0"},{name:"Другое",icon:"•",color:"#a3b4cf"},
+      ],
+      income:[{name:"Зарплата",icon:"💼",color:"#37c6b0"},{name:"Фриланс",icon:"💻",color:"#4b91ff"},{name:"Другое",icon:"•",color:"#a3b4cf"}],
+    },
+    transactions:[
+      {id:uid(),type:"income",amount:95000,cat:"Зарплата",acc:"a1",date:daysAgo(4),note:""},
+      {id:uid(),type:"expense",amount:2400,cat:"Еда",acc:"a1",date:daysAgo(3),note:"Продукты"},
+      {id:uid(),type:"expense",amount:1200,cat:"Кафе",acc:"a1",date:daysAgo(2),note:""},
+      {id:uid(),type:"expense",amount:35000,cat:"Жильё",acc:"a1",date:daysAgo(2),note:"Аренда"},
+      {id:uid(),type:"expense",amount:900,cat:"Транспорт",acc:"a2",date:daysAgo(1),note:""},
+      {id:uid(),type:"expense",amount:1800,cat:"Развлечения",acc:"a1",date:daysAgo(1),note:"Кино"},
+      {id:uid(),type:"expense",amount:650,cat:"Еда",acc:"a2",date:todayISO(),note:""},
+    ],
+    budgets:[
+      {cat:"Еда",limit:15000},{cat:"Кафе",limit:5000},
+      {cat:"Транспорт",limit:4000},{cat:"Развлечения",limit:6000},
+    ],
+    goals:[
+      {id:uid(),name:"Отпуск",icon:"✈️",target:150000,saved:85000},
+      {id:uid(),name:"Подушка",icon:"🛟",target:300000,saved:120000},
+    ],
+    habits:[
+      {id:uid(),name:"Спорт",icon:"🏃",color:"#37c6b0",type:"bool",freq:"week",weekTarget:3,marks:{[daysAgo(1)]:1,[daysAgo(3)]:1,[daysAgo(5)]:1,[daysAgo(6)]:1}},
+      {id:uid(),name:"Вода 2л",icon:"💧",color:"#4b91ff",type:"bool",freq:"daily",marks:{[daysAgo(1)]:1,[daysAgo(2)]:1,[daysAgo(3)]:1}},
+      {id:uid(),name:"Чтение",icon:"📖",color:"#8f8bff",type:"bool",freq:"daily",marks:{[daysAgo(1)]:1,[daysAgo(2)]:1}},
+      {id:uid(),name:"Медитация",icon:"🧘",color:"#f0b45a",type:"bool",freq:"daily",marks:{}},
+    ],
+    health:{
+      waterGoal:2, sleepGoal:8,
+      water:{[todayISO()]:0.75, [daysAgo(1)]:2, [daysAgo(2)]:1.5},
+      sleep:{[daysAgo(1)]:7.5,[daysAgo(2)]:6.5,[daysAgo(3)]:8},
+      weight:{[daysAgo(20)]:68,[daysAgo(14)]:67.4,[daysAgo(7)]:67,[daysAgo(1)]:66.6},
+      workouts:[{id:uid(),date:daysAgo(1),type:"Бег",min:30},{id:uid(),date:daysAgo(3),type:"Зал",min:60}],
+      meals:{[todayISO()]:2,[daysAgo(1)]:3},
+    },
+  };
+}
+
+/* ---------- FINANCE HELPERS ---------- */
+function monthStartDate(){
+  const now=new Date(); const d=S.settings.monthStart;
+  let y=now.getFullYear(), m=now.getMonth();
+  if(now.getDate()<d){ m-=1; if(m<0){m=11;y-=1;} }
+  return new Date(y,m,d);
+}
+function inThisMonth(iso){ return new Date(iso) >= monthStartDate(); }
+function accBalance(id){
+  const a=S.accounts.find(x=>x.id===id); let b=a.init;
+  S.transactions.forEach(t=>{
+    if(t.acc===id){ if(t.type==="income")b+=t.amount; else if(t.type==="expense")b-=t.amount; else if(t.type==="transfer")b-=t.amount; }
+    if(t.type==="transfer" && t.toAcc===id) b+=t.amount;
+  });
+  return b;
+}
+function totalBalance(){ return S.accounts.reduce((s,a)=>s+accBalance(a.id),0); }
+function monthStats(){
+  let inc=0,exp=0;
+  S.transactions.forEach(t=>{ if(!inThisMonth(t.date))return; if(t.type==="income")inc+=t.amount; else if(t.type==="expense")exp+=t.amount; });
+  return {inc,exp,saved:inc-exp};
+}
+function spentByCat(cat){ let s=0; S.transactions.forEach(t=>{ if(t.type==="expense"&&t.cat===cat&&inThisMonth(t.date))s+=t.amount; }); return s; }
+function catMeta(cat){
+  return S.categories.expense.concat(S.categories.income).find(c=>c.name===cat) || {icon:"•",color:"#a3b4cf"};
+}
+
+/* ---------- HABIT HELPERS ---------- */
+function habitDoneToday(h){ return !!h.marks[todayISO()]; }
+function habitStreak(h){
+  if(h.freq==="week"){
+    let weeks=0; let cur=new Date();
+    for(let w=0; w<52; w++){
+      const start=new Date(cur); const dow=(start.getDay()+6)%7; start.setDate(start.getDate()-dow-w*7);
+      let cnt=0; for(let i=0;i<7;i++){ const d=new Date(start); d.setDate(d.getDate()+i); if(h.marks[d.toISOString().slice(0,10)])cnt++; }
+      const isCurrent = w===0;
+      if(cnt>=h.weekTarget) weeks++;
+      else if(!isCurrent) break;
+      else if(isCurrent) continue;
+    }
+    return weeks;
+  }
+  let n=0; let i=0;
+  if(!h.marks[todayISO()]) i=1;
+  for(; i<400; i++){ if(h.marks[daysAgo(i)]) n++; else break; }
+  return n;
+}
+function habitWeekPct(h){
+  let done=0; for(let i=0;i<7;i++){ if(h.marks[daysAgo(i)])done++; }
+  const target = h.freq==="week"? h.weekTarget : 7;
+  return Math.min(100, Math.round(done/target*100));
+}
+function toggleHabit(h,date){ date=date||todayISO(); if(h.marks[date])delete h.marks[date]; else { h.marks[date]=1; tg.HapticFeedback?.notificationOccurred('success'); } save(); }
+
+function syncSportHabit(){
+  const h=S.habits.find(x=>/спорт|трениров|бег|зал|фитнес/i.test(x.name));
+  if(!h) return;
+  const dates=new Set(S.health.workouts.map(w=>w.date));
+  dates.forEach(d=>{ h.marks[d]=1; });
+}
+
+/* ---------- NAV ---------- */
+const TABS=[
+  {id:"home",label:"Главная",icon:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/>'},
+  {id:"fin",label:"Финансы",icon:'<path d="M3 7h18v12H3z"/><path d="M3 11h18"/><circle cx="8" cy="15" r="1.4"/>'},
+  {id:"hab",label:"Привычки",icon:'<path d="m5 12 4 4L19 6"/><path d="M3 18h8"/>'},
+  {id:"hea",label:"Здоровье",icon:'<path d="M12 21s-7-4.5-9.5-9C.8 8.6 2.4 5 6 5c2 0 3.2 1.2 4 2.3C10.8 6.2 12 5 14 5c3.6 0 5.2 3.6 3.5 7-2.5 4.5-9.5 9-9.5 9z"/>'},
+];
+let current="home";
+function renderNav(){
+  $("#nav").innerHTML = TABS.map(t=>`
+    <button class="navbtn ${t.id===current?'on':''}" data-tab="${t.id}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t.icon}</svg>
+      ${t.label}
+    </button>`).join("");
+  $("#nav").querySelectorAll("[data-tab]").forEach(b=> b.onclick=()=>go(b.dataset.tab));
+}
+function go(tab){
+  current=tab;
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  $("#s-"+tab).classList.add("active");
+  renderNav();
+  const col={home:"--fin",fin:"--fin",hab:"--hab",hea:"--hea"}[tab];
+  document.querySelectorAll(".navbtn.on").forEach(b=>b.style.color=`var(${col})`);
+  $(".fab").style.background=`var(${col})`;
+  window.scrollTo(0,0);
+  renderAll();
+}
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  const st=monthStats();
+  const budgetsTotal=S.budgets.reduce((s,b)=>s+b.limit,0);
+  const budgetsSpent=S.budgets.reduce((s,b)=>s+spentByCat(b.cat),0);
+  const budgetLeft=budgetsTotal-budgetsSpent;
+  const water=S.health.water[todayISO()]||0;
+  const wPct=Math.min(100,water/S.health.waterGoal*100);
+  const dueHabits=S.habits.filter(h=> h.freq==="daily" || !habitDoneToday(h));
+  $("#s-home").innerHTML=`
+    <div class="card" style="background:var(--fin-bg); border-color:transparent;">
+      <div class="row sb">
+        <div>
+          <div class="hint" style="color:#bcd4ff; opacity:.9; font-weight:600;">Всего на счетах</div>
+          <div class="big" style="color:#fff;">${fmt(totalBalance())}</div>
+        </div>
+        <span class="pill" style="background:rgba(255,255,255,.14); color:${st.saved>=0?'var(--good)':'var(--bad)'};">
+          ${st.saved>=0?'▲':'▼'} ${fmt(Math.abs(st.saved))} за мес</span>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="stat"><div class="lbl">Доход за месяц</div><div class="val" style="color:var(--good)">+${fmt(st.inc)}</div></div>
+      <div class="stat"><div class="lbl">Расход за месяц</div><div class="val">−${fmt(st.exp)}</div></div>
+    </div>
+
+    <div class="card">
+      <div class="row sb"><b>Остаток бюджета</b><span class="sm">${fmt(budgetLeft)} из ${fmt(budgetsTotal)}</span></div>
+      <div class="bar"><i style="width:${Math.min(100,budgetsSpent/budgetsTotal*100)}%; background:${budgetLeft<0?'var(--bad)':'var(--fin)'}"></i></div>
+    </div>
+
+    <h2 class="sec">Здоровье сегодня</h2>
+    <div class="grid3">
+      ${ringCard(wPct,"var(--hea)",water.toFixed(1)+"л","Вода")}
+      ${miniStat("😴", (S.health.sleep[daysAgo(1)]||"—"), "ч сна")}
+      ${miniStat("🏃", S.health.workouts.filter(w=>w.date===todayISO()||w.date===daysAgo(1)).length, "трен.")}
+    </div>
+
+    <h2 class="sec">Привычки сегодня</h2>
+    <div class="card">
+      ${dueHabits.length? dueHabits.map(h=>`
+        <div class="listitem" data-hab="${h.id}">
+          <div class="ico" style="background:${h.color}22">${h.icon}</div>
+          <div class="grow"><div class="nm">${h.name}</div><div class="sm">🔥 ${habitStreak(h)} ${h.freq==="week"?"нед":"дн"}</div></div>
+          <div class="chk ${habitDoneToday(h)?'on':''}" style="${habitDoneToday(h)?`background:${h.color};border-color:${h.color}`:''}">${habitDoneToday(h)?'✓':''}</div>
+        </div>`).join("") : `<div class="empty">Всё выполнено 🎉</div>`}
+    </div>
+
+    <button class="btn ghost" style="margin-bottom:12px" onclick="openTxn()">＋ Добавить трату</button>
+  `;
+  $("#s-home").querySelectorAll("[data-hab]").forEach(el=> el.onclick=()=>{
+    const h=S.habits.find(x=>x.id===el.dataset.hab); toggleHabit(h); renderAll();
+  });
+}
+function ringCard(pct,color,val,lbl){
+  const r=26, c=2*Math.PI*r, off=c*(1-pct/100);
+  return `<div class="stat" style="display:flex;align-items:center;justify-content:center;">
+    <div class="ring">
+      <svg width="74" height="74"><circle cx="37" cy="37" r="${r}" fill="none" stroke="var(--border)" stroke-width="7"/>
+      <circle cx="37" cy="37" r="${r}" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"/></svg>
+      <div class="txt"><b>${val}</b><span>${lbl}</span></div>
+    </div></div>`;
+}
+function miniStat(ico,val,lbl){
+  return `<div class="stat" style="text-align:center;"><div style="font-size:24px">${ico}</div>
+    <div class="val" style="font-size:19px">${val}</div><div class="lbl">${lbl}</div></div>`;
+}
+
+/* ---------- FINANCE ---------- */
+function renderFin(){
+  const st=monthStats();
+  $("#s-fin").innerHTML=`
+    <div class="grid3">
+      <div class="stat"><div class="lbl">Доход</div><div class="val" style="color:var(--good);font-size:17px">+${short(st.inc)}</div></div>
+      <div class="stat"><div class="lbl">Расход</div><div class="val" style="font-size:17px">−${short(st.exp)}</div></div>
+      <div class="stat"><div class="lbl">Отложено</div><div class="val" style="color:${st.saved>=0?'var(--fin)':'var(--bad)'};font-size:17px">${short(st.saved)}</div></div>
+    </div>
+
+    <h2 class="sec">Счета</h2>
+    <div class="card">
+      ${S.accounts.map(a=>`<div class="listitem">
+        <div class="ico" style="background:${a.color}22">${a.icon}</div>
+        <div class="grow"><div class="nm">${a.name}</div></div>
+        <div class="amt">${fmt(accBalance(a.id))}</div></div>`).join("")}
+    </div>
+
+    <h2 class="sec">Бюджеты · этот месяц</h2>
+    <div class="card">
+      ${S.budgets.map(b=>{ const sp=spentByCat(b.cat); const p=Math.min(100,sp/b.limit*100); const over=sp>b.limit;
+        return `<div style="padding:10px 0; border-top:1px solid var(--border)">
+          <div class="row sb"><span class="nm" style="font-size:14px">${catMeta(b.cat).icon} ${b.cat}</span>
+            <span class="sm" style="color:${over?'var(--bad)':'var(--muted)'}">${fmt(sp)} / ${fmt(b.limit)}</span></div>
+          <div class="bar"><i style="width:${p}%; background:${over?'var(--bad)':'var(--fin)'}"></i></div></div>`;}).join("")}
+    </div>
+
+    <h2 class="sec">Цели</h2>
+    <div class="grid2">
+      ${S.goals.map(g=>{ const p=Math.min(100,g.saved/g.target*100);
+        return `<div class="stat"><div class="row sb"><span style="font-size:20px">${g.icon}</span><span class="sm">${Math.round(p)}%</span></div>
+        <div class="nm" style="margin-top:6px">${g.name}</div><div class="sm">${short(g.saved)} / ${short(g.target)}</div>
+        <div class="bar"><i style="width:${p}%; background:var(--fin)"></i></div></div>`;}).join("")}
+    </div>
+
+    <h2 class="sec">Операции</h2>
+    <div class="card">
+      ${txnList()}
+    </div>
+  `;
+}
+function short(n){ n=Math.round(n); if(Math.abs(n)>=1000) return (n/1000).toFixed(n%1000?1:0).replace(".0","")+"к "+RUB; return n+" "+RUB; }
+function txnList(){
+  const tx=[...S.transactions].sort((a,b)=> b.date.localeCompare(a.date)).slice(0,20);
+  if(!tx.length) return `<div class="empty">Пока нет операций</div>`;
+  let html="", lastDate="";
+  tx.forEach(t=>{
+    if(t.date!==lastDate){ lastDate=t.date; html+=`<div class="sm" style="margin:10px 0 2px; color:var(--hint)">${dateLabel(t.date)}</div>`; }
+    const m=catMeta(t.cat);
+    const acc=S.accounts.find(a=>a.id===t.acc);
+    html+=`<div class="listitem">
+      <div class="ico" style="background:${m.color}22">${m.icon}</div>
+      <div class="grow"><div class="nm" style="font-size:14px">${t.cat}${t.note?` · ${t.note}`:''}</div><div class="sm">${acc?acc.name:''}</div></div>
+      <div class="amt ${t.type==='income'?'pos':'neg'}">${t.type==='income'?'+':'−'}${fmt(t.amount)}</div></div>`;
+  });
+  return html;
+}
+function dateLabel(iso){
+  if(iso===todayISO())return "Сегодня"; if(iso===daysAgo(1))return "Вчера";
+  const d=new Date(iso); return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+}
+
+/* ---------- HABITS ---------- */
+function renderHab(){
+  $("#s-hab").innerHTML = S.habits.map(h=>{
+    let grid=""; for(let i=14;i>=0;i--){ const d=daysAgo(i); const on=h.marks[d]; grid+=`<div class="cell" style="background:${on?h.color:'var(--border)'}" title="${d}"></div>`; }
+    return `<div class="card" data-hab="${h.id}">
+      <div class="row">
+        <div class="ico" style="background:${h.color}22">${h.icon}</div>
+        <div class="grow"><div class="nm">${h.name}</div>
+          <div class="sm">${h.freq==="week"?`${h.weekTarget}×/нед`:"каждый день"} · 🔥 ${habitStreak(h)} ${h.freq==="week"?"нед":"дн"}</div></div>
+        <div class="chk ${habitDoneToday(h)?'on':''}" data-toggle="${h.id}" style="${habitDoneToday(h)?`background:${h.color};border-color:${h.color}`:''}">${habitDoneToday(h)?'✓':''}</div>
+      </div>
+      <div class="row sb" style="margin-top:12px"><span class="sm">Последние 15 дней</span><span class="sm">${habitWeekPct(h)}% за нед</span></div>
+      <div class="streakgrid">${grid}</div>
+    </div>`;
+  }).join("") + `<button class="btn ghost" style="margin-bottom:12px" onclick="openHabit()">＋ Новая привычка</button>`;
+  $("#s-hab").querySelectorAll("[data-toggle]").forEach(el=> el.onclick=(e)=>{
+    e.stopPropagation(); const h=S.habits.find(x=>x.id===el.dataset.toggle); toggleHabit(h); renderAll();
+  });
+}
+
+/* ---------- HEALTH ---------- */
+function renderHea(){
+  const water=S.health.water[todayISO()]||0;
+  const wPct=Math.min(100,water/S.health.waterGoal*100);
+  const weights=Object.entries(S.health.weight).sort((a,b)=>a[0].localeCompare(b[0]));
+  const lastW=weights.length?weights[weights.length-1][1]:null;
+  const firstW=weights.length?weights[0][1]:null;
+  const diff = lastW!=null&&firstW!=null? (lastW-firstW):0;
+  $("#s-hea").innerHTML=`
+    <div class="card">
+      <div class="row sb"><b>💧 Вода</b><span class="sm">${water.toFixed(2)}л / ${S.health.waterGoal}л</span></div>
+      <div class="bar"><i style="width:${wPct}%; background:var(--hea)"></i></div>
+      <div class="plusrow" style="margin-top:12px">
+        <button class="btn sm ghost" onclick="addWater(0.25)">+ стакан</button>
+        <button class="btn sm ghost" onclick="addWater(0.5)">+ 0.5л</button>
+        <button class="btn sm ghost" onclick="addWater(-0.25)">−</button>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="stat"><div class="lbl">Сон вчера</div><div class="val">${S.health.sleep[daysAgo(1)]||"—"} ч</div>
+        <button class="btn sm ghost" style="margin-top:8px; width:100%" onclick="openSleep()">Записать сон</button></div>
+      <div class="stat"><div class="lbl">Вес</div><div class="val">${lastW??"—"} кг</div>
+        <div class="sm" style="color:${diff<=0?'var(--good)':'var(--warn)'}">${diff>0?'+':''}${diff.toFixed(1)} кг за период</div></div>
+    </div>
+
+    <div class="card">
+      <div class="row sb"><b>📉 Динамика веса</b><span class="sm">${weights.length} записей</span></div>
+      ${sparkline(weights.map(w=>w[1]))}
+      <button class="btn sm ghost" style="margin-top:10px; width:100%" onclick="openWeight()">Записать вес</button>
+    </div>
+
+    <h2 class="sec">Тренировки <span class="tag" style="background:var(--hab-bg); color:#c3c0ff">→ привычка «Спорт»</span></h2>
+    <div class="card">
+      ${S.health.workouts.length? [...S.health.workouts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8).map(w=>`
+        <div class="listitem"><div class="ico" style="background:var(--hea-bg)">🏋️</div>
+          <div class="grow"><div class="nm" style="font-size:14px">${w.type}</div><div class="sm">${dateLabel(w.date)}</div></div>
+          <div class="amt">${w.min} мин</div></div>`).join("") : `<div class="empty">Ещё нет тренировок</div>`}
+      <button class="btn sm ghost" style="margin-top:12px; width:100%" onclick="openWorkout()">＋ Добавить тренировку</button>
+    </div>
+
+    <div class="card tight">
+      <div class="row sb"><b>🍽️ Приёмы пищи сегодня</b>
+        <div class="plusrow"><button class="stepbtn" onclick="addMeal(-1)">−</button>
+        <b style="font-size:20px; min-width:24px; text-align:center">${S.health.meals[todayISO()]||0}</b>
+        <button class="stepbtn" onclick="addMeal(1)">+</button></div></div>
+    </div>
+  `;
+}
+function sparkline(vals){
+  if(vals.length<2) return `<div class="empty">Мало данных</div>`;
+  const w=420,h=44,pad=4; const min=Math.min(...vals),max=Math.max(...vals); const rng=max-min||1;
+  const pts=vals.map((v,i)=>{ const x=pad+i*(w-2*pad)/(vals.length-1); const y=h-pad-(v-min)/rng*(h-2*pad); return `${x.toFixed(1)},${y.toFixed(1)}`; });
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <polyline fill="none" stroke="var(--hea)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${pts.join(" ")}"/>
+    <circle cx="${pts[pts.length-1].split(",")[0]}" cy="${pts[pts.length-1].split(",")[1]}" r="3.5" fill="var(--hea)"/></svg>`;
+}
+
+/* ---------- HEALTH ACTIONS ---------- */
+function addWater(a){ const t=todayISO(); S.health.water[t]=Math.max(0,+( (S.health.water[t]||0)+a ).toFixed(2)); save(); renderAll(); }
+function addMeal(a){ const t=todayISO(); S.health.meals[t]=Math.max(0,(S.health.meals[t]||0)+a); save(); renderAll(); }
+
+/* ---------- SHEETS ---------- */
+let sheetState={};
+function openSheet(html){ $("#sheet").innerHTML=`<div class="grabber"></div>`+html; $("#sheetBg").classList.add("open"); tg.BackButton.show(); }
+function closeSheet(){ $("#sheetBg").classList.remove("open"); tg.BackButton.hide(); }
+tg.BackButton.onClick(()=>closeSheet());
+$("#sheetBg").onclick=e=>{ if(e.target===$("#sheetBg"))closeSheet(); };
+
+function openTxn(){
+  sheetState={type:"expense", cat:S.categories.expense[0].name, acc:S.accounts[0].id};
+  renderTxnSheet();
+}
+function renderTxnSheet(){
+  const cats = sheetState.type==="income"? S.categories.income : S.categories.expense;
+  if(!cats.find(c=>c.name===sheetState.cat)) sheetState.cat=cats[0].name;
+  openSheet(`
+    <h3>Новая операция</h3>
+    <div class="seg" id="txType">
+      <button data-t="expense" class="${sheetState.type==='expense'?'on':''}">Расход</button>
+      <button data-t="income" class="${sheetState.type==='income'?'on':''}">Доход</button>
+    </div>
+    <label class="f">Сумма, ${RUB}</label>
+    <input id="txAmt" type="number" inputmode="decimal" placeholder="0" autofocus>
+    <label class="f">Категория</label>
+    <div class="chips" id="txCats">${cats.map(c=>`<button class="chip ${c.name===sheetState.cat?'on':''}" data-c="${c.name}">${c.icon} ${c.name}</button>`).join("")}</div>
+    <label class="f">Счёт</label>
+    <div class="chips" id="txAccs">${S.accounts.map(a=>`<button class="chip ${a.id===sheetState.acc?'on':''}" data-a="${a.id}">${a.icon} ${a.name}</button>`).join("")}</div>
+    <label class="f">Заметка</label>
+    <input id="txNote" placeholder="необязательно">
+    <button class="btn" style="margin-top:20px" id="txSave">Сохранить</button>
+  `);
+  $("#txType").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{ sheetState.type=b.dataset.t; renderTxnSheet(); });
+  $("#txCats").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ sheetState.cat=b.dataset.c; renderTxnSheet(); });
+  $("#txAccs").querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{ sheetState.acc=b.dataset.a; renderTxnSheet(); });
+  $("#txSave").onclick=()=>{
+    const amt=parseFloat($("#txAmt").value); if(!amt||amt<=0){ $("#txAmt").focus(); return; }
+    S.transactions.push({id:uid(),type:sheetState.type,amount:amt,cat:sheetState.cat,acc:sheetState.acc,date:todayISO(),note:$("#txNote").value.trim()});
+    save(); closeSheet(); renderAll();
+  };
+}
+
+function openHabit(){
+  sheetState={color:"#8f8bff",icon:"⭐",freq:"daily",weekTarget:3};
+  const icons=["⭐","🏃","💧","📖","🧘","🍎","💊","🛏️","🚭","🎯","💪","🌱"];
+  openSheet(`
+    <h3>Новая привычка</h3>
+    <label class="f">Название</label>
+    <input id="hbName" placeholder="Напр. Зарядка" autofocus>
+    <label class="f">Иконка</label>
+    <div class="chips" id="hbIco">${icons.map(i=>`<button class="chip ${i===sheetState.icon?'on':''}" data-i="${i}" style="font-size:19px">${i}</button>`).join("")}</div>
+    <label class="f">Частота</label>
+    <div class="seg" id="hbFreq">
+      <button data-f="daily" class="on">Каждый день</button>
+      <button data-f="week">N раз в неделю</button>
+    </div>
+    <div id="hbWeek" style="display:none">
+      <label class="f">Раз в неделю</label>
+      <div class="plusrow"><button class="stepbtn" data-w="-1">−</button>
+        <b id="hbWt" style="font-size:20px;min-width:30px;text-align:center">3</b>
+        <button class="stepbtn" data-w="1">+</button></div>
+    </div>
+    <button class="btn" style="margin-top:20px; background:var(--hab)" id="hbSave">Создать</button>
+  `);
+  $("#hbIco").querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{ sheetState.icon=b.dataset.i; $("#hbIco").querySelectorAll(".chip").forEach(x=>x.classList.remove("on")); b.classList.add("on"); });
+  $("#hbFreq").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{ sheetState.freq=b.dataset.f; $("#hbFreq").querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); $("#hbWeek").style.display=b.dataset.f==="week"?"block":"none"; });
+  $("#hbWeek").querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{ sheetState.weekTarget=Math.max(1,Math.min(7,sheetState.weekTarget+parseInt(b.dataset.w))); $("#hbWt").textContent=sheetState.weekTarget; });
+  $("#hbSave").onclick=()=>{
+    const name=$("#hbName").value.trim(); if(!name){ $("#hbName").focus(); return; }
+    S.habits.push({id:uid(),name,icon:sheetState.icon,color:sheetState.color,type:"bool",freq:sheetState.freq,weekTarget:sheetState.weekTarget,marks:{}});
+    save(); closeSheet(); renderAll();
+  };
+}
+
+function openWorkout(){
+  const types=["Бег","Зал","Йога","Велосипед","Плавание","Ходьба"];
+  sheetState={type:"Бег"};
+  openSheet(`
+    <h3>Тренировка</h3>
+    <label class="f">Тип</label>
+    <div class="chips" id="woT">${types.map(t=>`<button class="chip ${t===sheetState.type?'on':''}" data-t="${t}">${t}</button>`).join("")}</div>
+    <label class="f">Длительность, мин</label>
+    <input id="woMin" type="number" inputmode="numeric" value="30">
+    <div class="card tight" style="margin-top:16px; background:var(--hab-bg); border-color:transparent">
+      <span class="sm" style="color:#c3c0ff">✓ Автоматически закроет привычку «Спорт» на сегодня</span>
+    </div>
+    <button class="btn" style="margin-top:16px; background:var(--hea)" id="woSave">Сохранить</button>
+  `);
+  $("#woT").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{ sheetState.type=b.dataset.t; $("#woT").querySelectorAll(".chip").forEach(x=>x.classList.remove("on")); b.classList.add("on"); });
+  $("#woSave").onclick=()=>{
+    const min=parseInt($("#woMin").value)||0;
+    S.health.workouts.push({id:uid(),date:todayISO(),type:sheetState.type,min});
+    syncSportHabit(); save(); closeSheet(); renderAll();
+  };
+}
+function openSleep(){
+  openSheet(`<h3>Сон</h3><label class="f">Сколько часов спал(а)?</label>
+    <input id="slH" type="number" inputmode="decimal" step="0.5" value="8" autofocus>
+    <label class="f">За какую ночь</label>
+    <div class="seg" id="slD"><button data-d="1" class="on">Прошлую</button><button data-d="0">Сегодня</button></div>
+    <button class="btn" style="margin-top:18px; background:var(--hea)" id="slSave">Сохранить</button>`);
+  let day=1; $("#slD").querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{ day=+b.dataset.d; $("#slD").querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); });
+  $("#slSave").onclick=()=>{ const h=parseFloat($("#slH").value); if(h>0){ S.health.sleep[daysAgo(day)]=h; save(); } closeSheet(); renderAll(); };
+}
+function openWeight(){
+  openSheet(`<h3>Вес</h3><label class="f">Текущий вес, кг</label>
+    <input id="wtV" type="number" inputmode="decimal" step="0.1" placeholder="66.5" autofocus>
+    <button class="btn" style="margin-top:18px; background:var(--hea)" id="wtSave">Сохранить</button>`);
+  $("#wtSave").onclick=()=>{ const v=parseFloat($("#wtV").value); if(v>0){ S.health.weight[todayISO()]=v; save(); } closeSheet(); renderAll(); };
+}
+
+$("#fab").onclick=()=>{
+  if(current==="hab")openHabit();
+  else if(current==="hea")openWorkout();
+  else openTxn();
+};
+
+/* ---------- HERO SCENE ---------- */
+function nightScene(){ return `
+<svg viewBox="0 0 400 272" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+ <linearGradient id="nsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1230"/><stop offset=".55" stop-color="#1a2b54"/><stop offset="1" stop-color="#324a78"/></linearGradient>
+ <linearGradient id="nm1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#43598c"/><stop offset="1" stop-color="#26375f"/></linearGradient>
+ <linearGradient id="nm2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d2c4f"/><stop offset="1" stop-color="#0f1c38"/></linearGradient>
+ <radialGradient id="nmoon" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f2f6ff"/><stop offset="1" stop-color="#c9d6f2"/></radialGradient>
+ <mask id="ncre"><circle cx="300" cy="72" r="24" fill="#fff"/><circle cx="311" cy="64" r="20" fill="#000"/></mask>
+</defs>
+<rect width="400" height="272" fill="url(#nsky)"/>
+<circle cx="300" cy="72" r="46" fill="#dfe8ff" opacity=".05"/>
+<circle cx="300" cy="72" r="24" fill="url(#nmoon)" mask="url(#ncre)"/>
+<g fill="#e6edff">
+ <circle cx="45" cy="42" r="1.4"/><circle cx="95" cy="70" r="1"/><circle cx="140" cy="38" r="1.5"/><circle cx="185" cy="60" r="1"/><circle cx="70" cy="110" r="1.1"/><circle cx="30" cy="82" r="1"/><circle cx="222" cy="34" r="1.2"/><circle cx="250" cy="96" r="1"/><circle cx="120" cy="90" r="1"/><circle cx="356" cy="120" r="1.2"/><circle cx="378" cy="55" r="1"/><circle cx="162" cy="112" r="1"/>
+</g>
+<path d="M0 165 L60 100 L120 150 L190 92 L260 148 L330 105 L400 150 L400 272 L0 272 Z" fill="url(#nm1)"/>
+<path d="M120 150 L150 118 L172 150 Z" fill="#eef3ff" opacity=".45"/>
+<path d="M0 205 L80 148 L150 198 L230 150 L310 200 L400 168 L400 272 L0 272 Z" fill="url(#nm2)"/>
+<path d="M0 230 Q200 216 400 234 L400 272 L0 272 Z" fill="#0c1730"/>
+<polygon points="150,232 170,232 160,211" fill="#e79a5b"/>
+<polygon points="174,233 194,233 184,214" fill="#cf7f44"/>
+<ellipse cx="172" cy="235" rx="30" ry="7" fill="#ffb166" opacity=".18"/>
+</svg>`; }
+function dayScene(){ return `
+<svg viewBox="0 0 400 272" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+ <linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fc4ea"/><stop offset=".6" stop-color="#c7e4f4"/><stop offset="1" stop-color="#eaf6fb"/></linearGradient>
+ <linearGradient id="dm1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8199b6"/><stop offset="1" stop-color="#61809e"/></linearGradient>
+ <linearGradient id="dm2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#40705f"/><stop offset="1" stop-color="#2b5145"/></linearGradient>
+ <linearGradient id="dlake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c3e2ec"/><stop offset="1" stop-color="#93c4d8"/></linearGradient>
+</defs>
+<rect width="400" height="272" fill="url(#dsky)"/>
+<circle cx="322" cy="70" r="58" fill="#fff6d8" opacity=".5"/>
+<circle cx="322" cy="70" r="29" fill="#ffe6a0"/>
+<g fill="#ffffff" opacity=".92">
+ <ellipse cx="88" cy="72" rx="33" ry="13"/><ellipse cx="118" cy="63" rx="23" ry="12"/>
+ <ellipse cx="205" cy="42" rx="25" ry="10"/><ellipse cx="230" cy="48" rx="17" ry="9"/>
+</g>
+<path d="M0 150 L70 92 L140 145 L210 90 L290 150 L360 108 L400 145 L400 272 L0 272 Z" fill="url(#dm1)"/>
+<path d="M120 145 L145 118 L167 145 Z" fill="#eef6fb"/><path d="M210 145 L210 90 L236 122 Z" fill="#eef6fb" opacity=".85"/>
+<path d="M0 190 L80 138 L160 188 L240 140 L320 190 L400 162 L400 272 L0 272 Z" fill="url(#dm2)"/>
+<path d="M0 206 L400 215 L400 272 L0 272 Z" fill="url(#dlake)"/>
+<g fill="#2e5a4c">
+ <polygon points="40,206 48,181 56,206"/><polygon points="58,206 66,187 74,206"/><polygon points="328,206 336,183 344,206"/><polygon points="346,206 353,190 360,206"/>
+</g>
+</svg>`; }
+
+/* ---------- BOOT ---------- */
+function renderAll(){
+  renderHome(); renderFin(); renderHab(); renderHea();
+}
+function initHeader(){
+  const d=new Date();
+  $("#hDate").textContent=`${WD[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  const hr=d.getHours();
+  $("#hTitle").textContent = (hr<6?"Доброй ночи":hr<12?"Доброе утро":hr<18?"Добрый день":"Добрый вечер")+" 👋";
+  const night = hr<7 || hr>=19;
+  $("#heroScene").innerHTML = night ? nightScene() : dayScene();
+}
+tg.setHeaderColor?.('#0b1329');
+tg.setBackgroundColor?.('#0a1226');
+load(); syncSportHabit(); save();
+initHeader(); renderNav(); renderAll();
+</script>
+
+
+</body></html>
